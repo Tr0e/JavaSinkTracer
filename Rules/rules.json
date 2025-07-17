@@ -1,6 +1,8 @@
 {
   "depth": 5,
-  "path_exclusions": [".idea","resources","test","META-INF"],
+  "path_exclusions": [
+    ".idea", "resources", "test*", "META-INF", ".git", "docs", "example*", "node_modules", "*.md", "build", "out", "target"
+  ],
   "sink_rules": [
     {
       "sink_name": "RCE",
@@ -8,7 +10,13 @@
       "severity_level": "High",
       "sinks": [
         "java.lang.Runtime:exec",
-        "groovy.lang.GroovyShell:evaluate"
+        "java.lang.Runtime:getRuntime",
+        "java.lang.ProcessBuilder:start",
+        "javax.script.ScriptEngine:eval",
+        "groovy.lang.GroovyShell:evaluate",
+        "org.codehaus.groovy.runtime.InvokerHelper:runScript",
+        "org.apache.commons.jexl3.JexlEngine:createScript",
+        "bsh.Interpreter:eval"
       ]
     },
     {
@@ -16,8 +24,15 @@
       "sink_desc": "反序列化漏洞",
       "severity_level": "High",
       "sinks": [
-        "java.io.ObjectInputStream:readObject|readUnshared",
-        "org.yaml.snakeyaml.Yaml:load"
+        "java.io.ObjectInputStream:readObject",
+        "java.io.ObjectInputStream:readUnshared",
+        "org.yaml.snakeyaml.Yaml:load",
+        "org.yaml.snakeyaml.Yaml:loadAs",
+        "com.thoughtworks.xstream.XStream:fromXML",
+        "com.alibaba.fastjson.JSON:parse",
+        "com.alibaba.fastjson.JSON:parseObject",
+        "com.alibaba.fastjson.JSON:parseArray",
+        "com.google.gson.Gson:fromJson"
       ]
     },
     {
@@ -26,7 +41,100 @@
       "severity_level": "Medium",
       "sinks": [
         "java.net.URL:openConnection",
-        "com.squareup.okhttp.OkHttpClient:newCall"
+        "java.net.URL:openStream",
+        "org.apache.http.client.HttpClient:execute",
+        "org.apache.http.impl.client.CloseableHttpClient:execute",
+        "org.apache.http.client.methods.HttpGet:<init>",
+        "org.apache.http.client.methods.HttpPost:<init>",
+        "com.squareup.okhttp.OkHttpClient:newCall",
+        "okhttp3.OkHttpClient:newCall",
+        "org.springframework.web.client.RestTemplate:exchange",
+        "org.springframework.web.client.RestTemplate:getForObject",
+        "org.springframework.web.client.RestTemplate:getForEntity",
+        "retrofit2.Retrofit:create"
+      ]
+    },
+    {
+      "sink_name": "SQLI",
+      "sink_desc": "SQL注入漏洞",
+      "severity_level": "High",
+      "sinks": [
+        "java.sql.Statement:execute",
+        "java.sql.Statement:executeQuery",
+        "java.sql.Statement:executeUpdate",
+        "java.sql.Connection:prepareStatement",
+        "java.sql.Connection:prepareCall",
+        "org.hibernate.Query:createQuery",
+        "org.hibernate.Query:executeUpdate",
+        "org.mybatis.spring.SqlSessionTemplate:selectOne",
+        "org.mybatis.spring.SqlSessionTemplate:selectList",
+        "javax.persistence.EntityManager:createQuery",
+        "javax.persistence.EntityManager:createNativeQuery",
+        "com.jfinal.plugin.activerecord.Db:find",
+        "com.jfinal.plugin.activerecord.Db:findFirst"
+      ]
+    },
+    {
+      "sink_name": "XSS",
+      "sink_desc": "跨站脚本漏洞",
+      "severity_level": "Medium",
+      "sinks": [
+        "javax.servlet.http.HttpServletResponse:getWriter",
+        "javax.servlet.http.HttpServletResponse:getOutputStream",
+        "org.springframework.web.servlet.ModelAndView:addObject",
+        "org.apache.struts2.ServletActionContext:getResponse",
+        "javax.servlet.jsp.JspWriter:print",
+        "javax.servlet.jsp.JspWriter:write",
+        "org.thymeleaf.context.Context:setVariable",
+        "org.springframework.web.servlet.ModelMap:addAttribute"
+      ]
+    },
+    {
+      "sink_name": "PATH_TRAVERSAL",
+      "sink_desc": "路径遍历漏洞",
+      "severity_level": "Medium",
+      "sinks": [
+        "java.io.File:<init>",
+        "java.nio.file.Files:newInputStream",
+        "java.nio.file.Files:newOutputStream",
+        "java.nio.file.Files:write",
+        "java.nio.file.Files:readAllBytes",
+        "org.apache.commons.io.FileUtils:openInputStream",
+        "org.apache.commons.io.FileUtils:openOutputStream",
+        "org.springframework.util.FileCopyUtils:copy"
+      ]
+    },
+    {
+      "sink_name": "LDAP_INJECTION",
+      "sink_desc": "LDAP注入",
+      "severity_level": "High",
+      "sinks": [
+        "javax.naming.directory.DirContext:search",
+        "javax.naming.directory.DirContext:lookup",
+        "org.springframework.ldap.core.LdapTemplate:search",
+        "org.springframework.ldap.core.LdapTemplate:lookup"
+      ]
+    },
+    {
+      "sink_name": "XXE",
+      "sink_desc": "XML外部实体注入",
+      "severity_level": "High",
+      "sinks": [
+        "javax.xml.parsers.DocumentBuilder:parse",
+        "javax.xml.parsers.SAXParser:parse",
+        "javax.xml.transform.Transformer:transform",
+        "org.dom4j.io.SAXReader:read",
+        "org.jdom2.input.SAXBuilder:build"
+      ]
+    },
+    {
+      "sink_name": "REDIRECT",
+      "sink_desc": "URL重定向",
+      "severity_level": "Medium",
+      "sinks": [
+        "javax.servlet.http.HttpServletResponse:sendRedirect",
+        "org.springframework.web.servlet.view.RedirectView:<init>",
+        "org.apache.struts2.ServletActionContext:getResponse"
       ]
     }
   ]
