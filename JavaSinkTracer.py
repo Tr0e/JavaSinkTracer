@@ -22,6 +22,7 @@ from AutoVulReport import generate_markdown_report
 
 init(autoreset=True)
 
+
 class JavaSinkTracer:
     def __init__(self, project_path: str, rules_path: str):
         self.project_path = project_path
@@ -54,8 +55,11 @@ class JavaSinkTracer:
         for root, _, files in os.walk(self.project_path):
             for file in files:
                 if file.endswith(".java") and not self._is_excluded(root):
-                    print(f"[+]正在分析的文件：{file}")
-                    self._process_file(os.path.join(root, file))
+                    try:
+                        print(f"[+]正在分析的文件：{file}")
+                        self._process_file(os.path.join(root, file))
+                    except Exception:
+                        continue
         print(Fore.LIGHTBLUE_EX + f"[+]AST构建全部完成！")
         # print(f"[+]已构建的调用关系图：{self.call_graph}")
         # print(f"[+]已构建的类方法信息：{self.class_methods}")
@@ -227,7 +231,6 @@ class JavaSinkTracer:
             results.append({"chain": chain, "code": code_list})
         return results
 
-
     def _trace_back(self, sink: str, max_depth: int) -> List[List[str]]:
         """
         根据最大追溯深度的限制，回溯污点传播的路径，支持多级调用链展开
@@ -287,12 +290,13 @@ class JavaSinkTracer:
     @staticmethod
     def find_parent_class(path) -> javalang.tree.ClassDeclaration:
         """
-        从AST路径中查找最近的类声明
+        从AST路径中查找最近的类声明或接口声明
         """
         for node in reversed(path):
-            if isinstance(node, javalang.tree.ClassDeclaration):
+            if isinstance(node, (javalang.tree.ClassDeclaration, javalang.tree.InterfaceDeclaration)):
                 return node
         raise ValueError("No class declaration found")
+
 
 def run():
     start_time = time.time()
@@ -325,7 +329,6 @@ def run():
     generate_markdown_report(java_project_name, java_project_path, sink_save_file, args.outputPath)
     print(f"[+]主进程任务完成，耗时：{round(time.time() - start_time, 2)}秒")
 
+
 if __name__ == "__main__":
     run()
-
-
